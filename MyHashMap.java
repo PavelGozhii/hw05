@@ -19,23 +19,19 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
 
     @Override
     public V put(K key, V value) {
-        remove(key);
-        capacity++;
-        if (capacity >= threshold) {
-            resize();
-        }
-        if (key == null) {
-            putVal(0, value, key);
+        if (key != null) {
+            remove(key);
+            capacity++;
+            if (capacity >= threshold) {
+                resize();
+            }
+            putVal(hashIndex(key), value, key);
             return value;
         }
-        putVal(hashIndex(key), value, key);
-        return value;
+        return null;
     }
 
     public int hashIndex(K key) {
-        if (key == null) {
-            return 0;
-        }
         return hashCode(key) & (size - 1);
     }
 
@@ -51,7 +47,6 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     }
 
     private void putVal(int index, V value, K key) {
-        remove(key);
         if (nodesArr[index] == null) {
             nodesArr[index] = new Node(hashCode(key), key, value, null);
         } else {
@@ -60,7 +55,6 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
                 currentNode = currentNode.next;
             }
             currentNode.next = new Node(hashCode(key), key, value, null);
-
         }
     }
 
@@ -75,57 +69,39 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
 
     @Override
     public V remove(K key) {
-        if (key == null) {
-            if (nodesArr[0].key == null) {
-                Node currNode = nodesArr[0];
-                nodesArr[0] = currNode.next;
-                return currNode.value;
-            } else {
-                if (nodesArr[0].next != null) {
-                    Node currNode = nodesArr[0].next;
-                    if (currNode.key == null) {
-                        nodesArr[0].next = currNode.next;
-                        return currNode.value;
-                    }
-                    Node lastNode;
-                    while (currNode.key != null) {
-                        lastNode = currNode;
-                        currNode = lastNode.next;
-                        if (nodesArr[0].key == null) {
-                            lastNode.next = currNode.next;
-                            currNode = currNode.next;
-                        }
-                    }
-                }
-            }
-
-        } else {
+        V val = null;
+        if (key != null) {
             int sizeArr = 16;
             while (sizeArr <= size) {
                 int index = hashIndex(key, sizeArr);
-                if (nodesArr[index] != null) {
+                val = removeVal(index, key);
+                sizeArr *= 2;
+            }
+        }
+        return val;
+    }
+
+    public V removeVal(int index, K key) {
+        if (nodesArr[index] != null) {
+            if (nodesArr[index].key.equals(key)) {
+                Node currNode = nodesArr[index];
+                nodesArr[index] = nodesArr[index].next;
+                return currNode.value;
+            } else {
+                Node lastNode = nodesArr[index];
+                Node currNode = nodesArr[index].next;
+                if (currNode.key.equals(key)) {
+                    lastNode.next = currNode.next;
+                    return currNode.value;
+                }
+                while (currNode.next != null) {
+                    lastNode = currNode;
+                    currNode = lastNode.next;
                     if (nodesArr[index].key.equals(key)) {
-                        Node currNode = nodesArr[index];
-                        nodesArr[index] = nodesArr[index].next;
+                        lastNode.next = currNode.next;
                         return currNode.value;
-                    } else {
-                        Node lastNode = nodesArr[index];
-                        Node currNode = nodesArr[index].next;
-                        if (currNode.key.equals(key)) {
-                            lastNode.next = currNode.next;
-                            return currNode.value;
-                        }
-                        while (currNode.next != null) {
-                            lastNode = currNode;
-                            currNode = lastNode.next;
-                            if (nodesArr[index].key.equals(key)) {
-                                lastNode.next = currNode.next;
-                                return currNode.value;
-                            }
-                        }
                     }
                 }
-                sizeArr *= 2;
             }
         }
         return null;
@@ -147,44 +123,33 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
 
     @Override
     public V get(K key) {
-        if (key == null) {
-            if (nodesArr[0].key == null) {
-                return nodesArr[0].value;
-            } else {
-                Node currNode = nodesArr[0].next;
-                if (currNode != null) {
-                    if (currNode.key == null) {
-                        return currNode.value;
-                    }
-                    while (currNode.key != null) {
-                        currNode = currNode.next;
-                        if (nodesArr[0].key == null) {
-                            return currNode.value;
-                        }
-                    }
-                }
-            }
-        } else {
+        V val = null;
+        if (key != null) {
             int sizeArr = 16;
             while (sizeArr <= size) {
                 int index = hashIndex(key, sizeArr);
-                if (nodesArr[index] != null) {
+                val = getVal(index, key);
+                sizeArr *= 2;
+            }
+        }
+        return val;
+    }
+
+    public V getVal(int index, K key){
+        if (nodesArr[index] != null) {
+            if (nodesArr[index].key.equals(key)) {
+                return nodesArr[index].value;
+            } else {
+                Node currNode = nodesArr[index].next;
+                if (currNode.key.equals(key)) {
+                    return currNode.value;
+                }
+                while (currNode.next != null) {
+                    currNode = currNode.next;
                     if (nodesArr[index].key.equals(key)) {
-                        return nodesArr[index].value;
-                    } else {
-                        Node currNode = nodesArr[index].next;
-                        if (currNode.key.equals(key)) {
-                            return currNode.value;
-                        }
-                        while (currNode.next != null) {
-                            currNode = currNode.next;
-                            if (nodesArr[index].key.equals(key)) {
-                                return currNode.value;
-                            }
-                        }
+                        return currNode.value;
                     }
                 }
-                sizeArr *= 2;
             }
         }
         return null;
@@ -212,10 +177,6 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         K key;
         V value;
         Node next;
-
-        public Node getNode(int a) {
-            return null;
-        }
 
         Node(int hashcode, K key, V value, Node next) {
             this.hashcode = hashcode;
