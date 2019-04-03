@@ -25,14 +25,10 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
             if (capacity >= threshold) {
                 resize();
             }
-            putVal(hashIndex(key), value, key);
+            putVal(hashIndex(key, nodesArr.length), value, key);
             return value;
         }
         return null;
-    }
-
-    public int hashIndex(K key) {
-        return hashCode(key) & (size - 1);
     }
 
     public int hashIndex(K key, int n) {
@@ -47,11 +43,11 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     }
 
     private void putVal(int index, V value, K key) {
-        if (nodesArr[index] == null) {
+        if (isEmpty(nodesArr[index])) {
             nodesArr[index] = new Node(hashCode(key), key, value, null);
         } else {
             Node currentNode = nodesArr[index];
-            while (currentNode.next != null) {
+            while (!isEmpty(currentNode.next)) {
                 currentNode = currentNode.next;
             }
             currentNode.next = new Node(hashCode(key), key, value, null);
@@ -59,20 +55,20 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     }
 
     private void resize() {
-        int size = this.size * 2;
-        Node[] tempNode = new MyHashMap.Node[size];
-        System.arraycopy(nodesArr, 0, tempNode, 0, this.size);
+        int size = nodesArr.length;
+        Node[] tempNode = new MyHashMap.Node[size * 2];
+        System.arraycopy(nodesArr, 0, tempNode, 0, size);
         this.nodesArr = tempNode;
         this.size = size;
-        this.threshold = (int) (this.size * loadFactor);
+        this.threshold = (int) (nodesArr.length * loadFactor);
     }
 
     @Override
     public V remove(K key) {
         V val = null;
         if (key != null) {
-            int sizeArr = 16;
-            while (sizeArr <= size) {
+            int sizeArr = size;
+            while (sizeArr <= nodesArr.length) {
                 int index = hashIndex(key, sizeArr);
                 val = removeVal(index, key);
                 sizeArr *= 2;
@@ -82,7 +78,7 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     }
 
     public V removeVal(int index, K key) {
-        if (nodesArr[index] != null) {
+        if (!isEmpty(nodesArr[index])) {
             if (nodesArr[index].key.equals(key)) {
                 Node currNode = nodesArr[index];
                 nodesArr[index] = nodesArr[index].next;
@@ -94,7 +90,7 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
                     lastNode.next = currNode.next;
                     return currNode.value;
                 }
-                while (currNode.next != null) {
+                while (!isEmpty(currNode.next)) {
                     lastNode = currNode;
                     currNode = lastNode.next;
                     if (nodesArr[index].key.equals(key)) {
@@ -109,24 +105,22 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
 
     @Override
     public void clear() {
-        loadFactor = 0.75;
-        threshold = 12;
-        size = 16;
+        threshold = (int) (loadFactor * size);
         capacity = 0;
         nodesArr = new MyHashMap.Node[size];
     }
 
     @Override
     public int size() {
-        return size;
+        return nodesArr.length;
     }
 
     @Override
     public V get(K key) {
         V val = null;
         if (key != null) {
-            int sizeArr = 16;
-            while (sizeArr <= size) {
+            int sizeArr = size;
+            while (sizeArr <= nodesArr.length) {
                 int index = hashIndex(key, sizeArr);
                 val = getVal(index, key);
                 sizeArr *= 2;
@@ -135,8 +129,8 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         return val;
     }
 
-    public V getVal(int index, K key){
-        if (nodesArr[index] != null) {
+    public V getVal(int index, K key) {
+        if (!isEmpty(nodesArr[index])) {
             if (nodesArr[index].key.equals(key)) {
                 return nodesArr[index].value;
             } else {
@@ -144,7 +138,7 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
                 if (currNode.key.equals(key)) {
                     return currNode.value;
                 }
-                while (currNode.next != null) {
+                while (!isEmpty(currNode.next)) {
                     currNode = currNode.next;
                     if (nodesArr[index].key.equals(key)) {
                         return currNode.value;
@@ -154,6 +148,19 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         }
         return null;
     }
+
+    public boolean isEmpty() {
+        return capacity == 0;
+    }
+
+    private boolean isEmpty(Node node) {
+        return node == null;
+    }
+
+    public boolean containsKey(K key) {
+        return get(key) != null;
+    }
+
 
     @Override
     public String toString() {
