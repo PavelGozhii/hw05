@@ -58,9 +58,9 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         int size = nodesArr.length;
         Node[] tempNode = new MyHashMap.Node[size * 2];
         System.arraycopy(nodesArr, 0, tempNode, 0, size);
-        this.nodesArr = tempNode;
+        nodesArr = tempNode;
         this.size = size;
-        this.threshold = (int) (nodesArr.length * loadFactor);
+        threshold = (int) (nodesArr.length * loadFactor);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         return val;
     }
 
-    public V removeVal(int index, K key) {
+    private V removeVal(int index, K key) {
         if (!isEmpty(nodesArr[index])) {
             if (nodesArr[index].key.equals(key)) {
                 Node currNode = nodesArr[index];
@@ -129,7 +129,7 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
         return val;
     }
 
-    public V getVal(int index, K key) {
+    private V getVal(int index, K key) {
         if (!isEmpty(nodesArr[index])) {
             if (nodesArr[index].key.equals(key)) {
                 return nodesArr[index].value;
