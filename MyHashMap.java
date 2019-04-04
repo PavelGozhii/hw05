@@ -25,17 +25,17 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
             if (capacity >= threshold) {
                 resize();
             }
-            putVal(hashIndex(key, nodesArr.length), value, key);
+            putVal(hashIndex(key), value, key);
             return value;
         }
         return null;
     }
 
-    public int hashIndex(K key, int n) {
+    public int hashIndex(K key) {
         if (key == null) {
             return 0;
         }
-        return hashCode(key) & (n - 1);
+        return Math.abs(hashCode(key)) % nodesArr.length;
     }
 
     public int hashCode(K key) {
@@ -67,12 +67,8 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     public V remove(K key) {
         V val = null;
         if (key != null) {
-            int sizeArr = size;
-            while (sizeArr <= nodesArr.length) {
-                int index = hashIndex(key, sizeArr);
+                int index = hashIndex(key);
                 val = removeVal(index, key);
-                sizeArr *= 2;
-            }
         }
         return val;
     }
@@ -119,12 +115,8 @@ public class MyHashMap<K, V> implements MyMap<K, V> {
     public V get(K key) {
         V val = null;
         if (key != null) {
-            int sizeArr = size;
-            while (sizeArr <= nodesArr.length) {
-                int index = hashIndex(key, sizeArr);
+                int index = hashIndex(key);
                 val = getVal(index, key);
-                sizeArr *= 2;
-            }
         }
         return val;
     }
